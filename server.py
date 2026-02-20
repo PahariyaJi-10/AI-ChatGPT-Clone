@@ -1,10 +1,11 @@
 import os
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 from google import genai
 from google.genai import types
 
 app = Flask(__name__)
-
+CORS(app)
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"),
     http_options=types.HttpOptions(api_version="v1")
