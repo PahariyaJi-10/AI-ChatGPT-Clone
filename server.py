@@ -3,13 +3,16 @@ from flask_cors import CORS
 from flask import Flask, request, jsonify
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
 
+load_dotenv()
+api_key=os.getenv("AIzaSyAtXEq9wZPb4u6U6WCEMZyP-AhVvhHJg8s")
+client = genai.Client( 
+    api_key=api_key
+)
 app = Flask(__name__)
 CORS(app)
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    http_options=types.HttpOptions(api_version="v1")
-)
+
 
 chat = client.chats.create(model="gemini-2.5-flash")
 
