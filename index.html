@@ -1,83 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My AI Chatbot</title>
+    <title>AI Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        pre {
+    background: #111;
+    color: #00ffcc;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+code {
+    font-family: monospace;
+}
         body {
+            background-color: #0f172a;
             font-family: Arial;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            margin-top: 40px;
+            margin: 0;
         }
 
-        .chat-box {
-            width: 450px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-
-        .messages {
-            height: 350px;
+        #chat-box {
+            height: 80vh;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 20px;
         }
 
-        .user { color: blue; margin-bottom: 8px; }
-        .bot { color: green; margin-bottom: 8px; }
+        .user {
+            text-align: right;
+            margin: 10px;
+            color: white;
+        }
+
+        .bot {
+            text-align: left;
+            margin: 10px;
+            color: #38bdf8;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 10px;
+            background: #1e293b;
+        }
 
         input {
-            width: 75%;
-            padding: 8px;
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
         }
 
         button {
-            padding: 8px;
-            background: #007bff;
-            color: white;
+            margin-left: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
             border: none;
+            background: #38bdf8;
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
 
-<div class="chat-box">
-    <h2>AI Chatbot</h2>
-    <div class="messages" id="messages"></div>
+<div id="chat-box"></div>
 
-    <input type="text" id="userInput" placeholder="Type message..." />
+<div id="input-area">
+    <input type="text" id="user-input" placeholder="Type your message..." />
     <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
 async function sendMessage() {
-    const input = document.getElementById("userInput");
-    const messages = document.getElementById("messages");
+    const inputField = document.getElementById("user-input");
+    const message = inputField.value;
+    if (!message) return;
 
-    const userText = input.value;
-    if (!userText) return;
+    const chatBox = document.getElementById("chat-box");
 
-    messages.innerHTML += `<div class="user"><b>You:</b> ${userText}</div>`;
-    input.value = "";
+    chatBox.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
+    inputField.value = "";
+
+    chatBox.innerHTML += `<div class="bot" id="typing">AI is typing...</div>`;
 
     const response = await fetch("http://127.0.0.1:5000/chat", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: userText })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
     });
 
     const data = await response.json();
 
-    messages.innerHTML += `<div class="bot"><b>Bot:</b> ${data.reply}</div>`;
-    messages.scrollTop = messages.scrollHeight;
+    document.getElementById("typing").remove();
+
+   chatBox.innerHTML += `
+    <div class="bot">
+        <b>AI:</b>
+        <div style="margin-top:8px;">
+            ${marked.parse(data.reply)}
+        </div>
+    </div>
+`;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+document.getElementById("user-input")
+    .addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendMessage();
+    });
 </script>
 
 </body>
